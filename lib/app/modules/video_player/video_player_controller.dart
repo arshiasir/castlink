@@ -61,61 +61,6 @@ class CustomVideoPlayerController extends GetxController {
     }
   }
 
-  Future<void> togglePictureInPicture() async {
-    try {
-      if (isPictureInPicture.value) {
-        // Exit PiP mode
-        await PlatformPip.exitPip();
-        await SystemChrome.setEnabledSystemUIMode(
-          SystemUiMode.edgeToEdge,
-          overlays: [SystemUiOverlay.top, SystemUiOverlay.bottom],
-        );
-        await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-        isPictureInPicture.value = false;
-        Get.snackbar(
-          'Success',
-          'Exited picture-in-picture mode',
-          snackPosition: SnackPosition.BOTTOM,
-          duration: const Duration(seconds: 2),
-        );
-      } else {
-        if (isPipAvailable.value) {
-          // Enter PiP mode
-          await SystemChrome.setEnabledSystemUIMode(
-            SystemUiMode.immersiveSticky,
-            overlays: [],
-          );
-          await SystemChrome.setPreferredOrientations([
-            DeviceOrientation.landscapeLeft,
-            DeviceOrientation.landscapeRight,
-          ]);
-          await PlatformPip.enterPip();
-          isPictureInPicture.value = true;
-          Get.snackbar(
-            'Success',
-            'Entered picture-in-picture mode',
-            snackPosition: SnackPosition.BOTTOM,
-            duration: const Duration(seconds: 2),
-          );
-        } else {
-          Get.snackbar(
-            'Error',
-            'Picture-in-picture is not supported on this device',
-            snackPosition: SnackPosition.BOTTOM,
-            duration: const Duration(seconds: 3),
-          );
-        }
-      }
-    } catch (e) {
-      print('Error toggling PiP mode: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to toggle picture-in-picture mode: ${e.toString()}',
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 3),
-      );
-    }
-  }
 
   Future<void> initializePlayer() async {
     try {
