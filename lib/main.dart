@@ -11,7 +11,6 @@ void main() async {
   Get.put(ThemeController());
   runApp(const MyApp());
 }
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 

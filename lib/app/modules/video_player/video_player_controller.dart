@@ -3,6 +3,8 @@ import 'package:video_player/video_player.dart' as video_player;
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:io' show Platform;
+import 'platform_pip.dart';
 
 class CustomVideoPlayerController extends GetxController {
   final videoUrl = ''.obs;
@@ -12,9 +14,24 @@ class CustomVideoPlayerController extends GetxController {
   final chewieController = Rxn<ChewieController>();
   final isPictureInPicture = false.obs;
   video_player.VideoPlayerController? _videoPlayerController;
+  final isPipAvailable = false.obs;
 
   // Add skip duration constant
   static const Duration skipDuration = Duration(seconds: 10);
+
+  @override
+  void onInit() {
+    super.onInit();
+    final args = Get.arguments as Map<String, String>;
+    videoUrl.value = args['url'] ?? '';
+    videoName.value = args['name'] ?? '';
+    _checkPipAvailability();
+    initializePlayer();
+  }
+
+  Future<void> _checkPipAvailability() async {
+    isPipAvailable.value = await PlatformPip.isPipSupported();
+  }
 
   // Add skip methods
   void skipForward() {
@@ -44,40 +61,60 @@ class CustomVideoPlayerController extends GetxController {
     }
   }
 
-  void togglePictureInPicture() async {
+  Future<void> togglePictureInPicture() async {
     try {
       if (isPictureInPicture.value) {
         // Exit PiP mode
+        await PlatformPip.exitPip();
         await SystemChrome.setEnabledSystemUIMode(
           SystemUiMode.edgeToEdge,
           overlays: [SystemUiOverlay.top, SystemUiOverlay.bottom],
         );
         await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-      } else {
-        // Enter PiP mode
-        await SystemChrome.setEnabledSystemUIMode(
-          SystemUiMode.immersiveSticky,
-          overlays: [],
+        isPictureInPicture.value = false;
+        Get.snackbar(
+          'Success',
+          'Exited picture-in-picture mode',
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 2),
         );
-        await SystemChrome.setPreferredOrientations([
-          DeviceOrientation.landscapeLeft,
-          DeviceOrientation.landscapeRight,
-        ]);
+      } else {
+        if (isPipAvailable.value) {
+          // Enter PiP mode
+          await SystemChrome.setEnabledSystemUIMode(
+            SystemUiMode.immersiveSticky,
+            overlays: [],
+          );
+          await SystemChrome.setPreferredOrientations([
+            DeviceOrientation.landscapeLeft,
+            DeviceOrientation.landscapeRight,
+          ]);
+          await PlatformPip.enterPip();
+          isPictureInPicture.value = true;
+          Get.snackbar(
+            'Success',
+            'Entered picture-in-picture mode',
+            snackPosition: SnackPosition.BOTTOM,
+            duration: const Duration(seconds: 2),
+          );
+        } else {
+          Get.snackbar(
+            'Error',
+            'Picture-in-picture is not supported on this device',
+            snackPosition: SnackPosition.BOTTOM,
+            duration: const Duration(seconds: 3),
+          );
+        }
       }
-      isPictureInPicture.value = !isPictureInPicture.value;
     } catch (e) {
       print('Error toggling PiP mode: $e');
-      errorMessage.value = 'Failed to toggle picture-in-picture mode';
+      Get.snackbar(
+        'Error',
+        'Failed to toggle picture-in-picture mode: ${e.toString()}',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 3),
+      );
     }
-  }
-
-  @override
-  void onInit() {
-    super.onInit();
-    final args = Get.arguments as Map<String, String>;
-    videoUrl.value = args['url'] ?? '';
-    videoName.value = args['name'] ?? '';
-    initializePlayer();
   }
 
   Future<void> initializePlayer() async {
@@ -103,6 +140,16 @@ class CustomVideoPlayerController extends GetxController {
       // Initialize the controller
       await _videoPlayerController!.initialize();
 
+      // Listen for PiP mode changes
+      _videoPlayerController!.addListener(() {
+        if (_videoPlayerController!.value.isPlaying) {
+          SystemChrome.setEnabledSystemUIMode(
+            SystemUiMode.immersiveSticky,
+            overlays: [],
+          );
+        }
+      });
+
       // Create Chewie controller with streaming-friendly settings
       chewieController.value = ChewieController(
         videoPlayerController: _videoPlayerController!,
@@ -126,16 +173,6 @@ class CustomVideoPlayerController extends GetxController {
         deviceOrientationsAfterFullScreen: [DeviceOrientation.portraitUp],
         deviceOrientationsOnEnterFullScreen: [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight],
       );
-
-      // Listen for PiP mode changes
-      _videoPlayerController!.addListener(() {
-        if (_videoPlayerController!.value.isPlaying) {
-          SystemChrome.setEnabledSystemUIMode(
-            SystemUiMode.immersiveSticky,
-            overlays: [],
-          );
-        }
-      });
     } catch (e) {
       print('Error initializing video player: $e');
       errorMessage.value = 'Failed to load video: ${e.toString()}';

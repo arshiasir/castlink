@@ -9,7 +9,10 @@ class VideoPlayerPage extends GetView<CustomVideoPlayerController> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Scaffold(
+      backgroundColor: Colors.black,
       body: Stack(
         children: [
           Center(
@@ -18,9 +21,14 @@ class VideoPlayerPage extends GetView<CustomVideoPlayerController> {
                 return const Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircularProgressIndicator(),
+                    CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
                     SizedBox(height: 16),
-                    Text('Loading video...'),
+                    Text(
+                      'Loading video...',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ],
                 );
               }
@@ -54,7 +62,10 @@ class VideoPlayerPage extends GetView<CustomVideoPlayerController> {
                 children: [
                   Icon(Icons.error_outline, size: 48, color: Colors.red),
                   SizedBox(height: 16),
-                  Text('Error loading video'),
+                  Text(
+                    'Error loading video',
+                    style: TextStyle(color: Colors.red),
+                  ),
                 ],
               );
             }),
@@ -81,6 +92,56 @@ class VideoPlayerPage extends GetView<CustomVideoPlayerController> {
               ),
             )),
           ),
+          // Add a floating control panel for PiP mode
+          Obx(() => controller.isPictureInPicture.value
+              ? Positioned(
+                  left: 16,
+                  bottom: 16,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.7),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.replay_10, color: Colors.white),
+                          onPressed: controller.skipBackward,
+                          tooltip: 'Skip backward 10 seconds',
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            controller.chewieController.value?.isPlaying ?? false
+                                ? Icons.pause
+                                : Icons.play_arrow,
+                            color: Colors.white,
+                          ),
+                          onPressed: () {
+                            if (controller.chewieController.value?.isPlaying ?? false) {
+                              controller.chewieController.value?.pause();
+                            } else {
+                              controller.chewieController.value?.play();
+                            }
+                          },
+                          tooltip: controller.chewieController.value?.isPlaying ?? false
+                              ? 'Pause'
+                              : 'Play',
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.forward_10, color: Colors.white),
+                          onPressed: controller.skipForward,
+                          tooltip: 'Skip forward 10 seconds',
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : const SizedBox.shrink()),
         ],
       ),
     );
