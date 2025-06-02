@@ -10,7 +10,55 @@ class CustomVideoPlayerController extends GetxController {
   final isLoading = true.obs;
   final errorMessage = ''.obs;
   final chewieController = Rxn<ChewieController>();
+  final isPictureInPicture = false.obs;
   video_player.VideoPlayerController? _videoPlayerController;
+
+  // Add skip duration constant
+  static const Duration skipDuration = Duration(seconds: 10);
+
+  // Add skip methods
+  void skipForward() {
+    if (_videoPlayerController != null) {
+      final currentPosition = _videoPlayerController!.value.position;
+      final newPosition = currentPosition + skipDuration;
+      final duration = _videoPlayerController!.value.duration;
+      
+      if (newPosition <= duration) {
+        _videoPlayerController!.seekTo(newPosition);
+      } else {
+        _videoPlayerController!.seekTo(duration);
+      }
+    }
+  }
+
+  void skipBackward() {
+    if (_videoPlayerController != null) {
+      final currentPosition = _videoPlayerController!.value.position;
+      final newPosition = currentPosition - skipDuration;
+      
+      if (newPosition >= Duration.zero) {
+        _videoPlayerController!.seekTo(newPosition);
+      } else {
+        _videoPlayerController!.seekTo(Duration.zero);
+      }
+    }
+  }
+
+  void togglePictureInPicture() async {
+    try {
+      if (isPictureInPicture.value) {
+        await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
+        await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+      } else {
+        await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+        await SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
+      }
+      isPictureInPicture.value = !isPictureInPicture.value;
+    } catch (e) {
+      print('Error toggling PiP mode: $e');
+      errorMessage.value = 'Failed to toggle picture-in-picture mode';
+    }
+  }
 
   @override
   void onInit() {
@@ -37,7 +85,7 @@ class CustomVideoPlayerController extends GetxController {
         },
         videoPlayerOptions: video_player.VideoPlayerOptions(
           mixWithOthers: true,
-          allowBackgroundPlayback: false,
+          allowBackgroundPlayback: true,
         ),
       );
 
