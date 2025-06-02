@@ -62,13 +62,22 @@ class VideoPlayerPage extends GetView<CustomVideoPlayerController> {
           Positioned(
             right: 16,
             top: 50,
-            child: Obx(() => FloatingActionButton(
-              heroTag: 'pipMode',
-              onPressed: controller.togglePictureInPicture,
-              child: Icon(
-                controller.isPictureInPicture.value 
-                    ? Icons.picture_in_picture_alt 
-                    : Icons.picture_in_picture,
+            child: Obx(() => Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: IconButton(
+                icon: Icon(
+                  controller.isPictureInPicture.value 
+                      ? Icons.picture_in_picture_alt 
+                      : Icons.picture_in_picture,
+                  color: Colors.white,
+                ),
+                onPressed: controller.togglePictureInPicture,
+                tooltip: controller.isPictureInPicture.value 
+                    ? 'Exit Picture-in-Picture' 
+                    : 'Enter Picture-in-Picture',
               ),
             )),
           ),

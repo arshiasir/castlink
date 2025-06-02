@@ -47,11 +47,22 @@ class CustomVideoPlayerController extends GetxController {
   void togglePictureInPicture() async {
     try {
       if (isPictureInPicture.value) {
-        await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
+        // Exit PiP mode
+        await SystemChrome.setEnabledSystemUIMode(
+          SystemUiMode.edgeToEdge,
+          overlays: [SystemUiOverlay.top, SystemUiOverlay.bottom],
+        );
         await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
       } else {
-        await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-        await SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
+        // Enter PiP mode
+        await SystemChrome.setEnabledSystemUIMode(
+          SystemUiMode.immersiveSticky,
+          overlays: [],
+        );
+        await SystemChrome.setPreferredOrientations([
+          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.landscapeRight,
+        ]);
       }
       isPictureInPicture.value = !isPictureInPicture.value;
     } catch (e) {
@@ -115,6 +126,16 @@ class CustomVideoPlayerController extends GetxController {
         deviceOrientationsAfterFullScreen: [DeviceOrientation.portraitUp],
         deviceOrientationsOnEnterFullScreen: [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight],
       );
+
+      // Listen for PiP mode changes
+      _videoPlayerController!.addListener(() {
+        if (_videoPlayerController!.value.isPlaying) {
+          SystemChrome.setEnabledSystemUIMode(
+            SystemUiMode.immersiveSticky,
+            overlays: [],
+          );
+        }
+      });
     } catch (e) {
       print('Error initializing video player: $e');
       errorMessage.value = 'Failed to load video: ${e.toString()}';
