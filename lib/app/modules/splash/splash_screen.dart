@@ -12,13 +12,16 @@ class SplashScreen extends GetView<SplashController> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TweenAnimationBuilder(
-              tween: Tween<double>(begin: 0, end: 1),
-              duration: const Duration(seconds: 1),
-              builder: (context, double value, child) {
-                return Transform.scale(scale: value, child: child);
-              },
-              child: Image.asset("assets/image/logo.png"),
+            Padding(
+              padding: const EdgeInsets.all(50),
+              child: TweenAnimationBuilder(
+                tween: Tween<double>(begin: 0, end: 1),
+                duration: const Duration(seconds: 1),
+                builder: (context, double value, child) {
+                  return Transform.scale(scale: value, child: child);
+                },
+                child: Image.asset("assets/image/logo.png"),
+              ),
             ),
             const SizedBox(height: 20),
             const Text(
@@ -26,7 +29,7 @@ class SplashScreen extends GetView<SplashController> {
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
-                color: Colors.blue,
+                color: Colors.black,
               ),
             ),
           ],
