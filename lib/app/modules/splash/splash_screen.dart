@@ -16,16 +16,9 @@ class SplashScreen extends GetView<SplashController> {
               tween: Tween<double>(begin: 0, end: 1),
               duration: const Duration(seconds: 1),
               builder: (context, double value, child) {
-                return Transform.scale(
-                  scale: value,
-                  child: child,
-                );
+                return Transform.scale(scale: value, child: child);
               },
-              child: const Icon(
-                Icons.link,
-                size: 100,
-                color: Colors.blue,
-              ),
+              child: Image.asset("assets/image/logo.png"),
             ),
             const SizedBox(height: 20),
             const Text(
@@ -41,4 +34,4 @@ class SplashScreen extends GetView<SplashController> {
       ),
     );
   }
-} 
+}
