@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:castlink/routes/app_pages.dart';
-import 'package:castlink/routes/app_routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,7 +22,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      initialRoute: AppRoutes.SPLASH,
+      initialRoute: Routes.SPLASH,
       getPages: AppPages.routes,
       initialBinding: SplashBinding()
     );

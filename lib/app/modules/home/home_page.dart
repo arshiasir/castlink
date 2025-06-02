@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:castlink/app/modules/home/home_controller.dart';
+import 'package:castlink/routes/app_pages.dart';
 
 class HomePage extends GetView<HomeController> {
   const HomePage({super.key});
@@ -87,10 +88,12 @@ class HomePage extends GetView<HomeController> {
                 ],
               ),
               onTap: () {
-                Get.snackbar(
-                  'Video Player',
-                  'Playing ${video.name}',
-                  snackPosition: SnackPosition.BOTTOM,
+                Get.toNamed(
+                  Routes.VIDEO_PLAYER,
+                  arguments: {
+                    'url': video.url,
+                    'name': video.name,
+                  },
                 );
               },
             );
